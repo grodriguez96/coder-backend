@@ -25,7 +25,6 @@ class CustomRouter {
       try {
         await each.apply(this, params);
       } catch (error: any) {
-        console.log('EnreeeeeeeeYS');
         params[1].json({
           statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
           message: error.message,

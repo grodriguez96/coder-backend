@@ -2,7 +2,7 @@ import type { Manager, ReadOptions, Result, PaginateResult } from '../../interfa
 import notFoundOne from '../../utils/notFoundOne';
 import { Types, PaginateModel, FilterQuery, Aggregate, FlattenMaps, UpdateQuery } from 'mongoose';
 
-class MongoManager<T> implements Manager<T> {
+class FsManager<T> implements Manager<T> {
   private model: PaginateModel<T>;
 
   constructor(model: PaginateModel<T>) {
@@ -10,13 +10,14 @@ class MongoManager<T> implements Manager<T> {
     this.init();
   }
 
-  protected init() {}
+  protected init(): void {}
 
   public create(data: T): Promise<Result<T>> {
     return this.model.create(data);
   }
 
   public read({ filter, options }: ReadOptions<T>): Promise<PaginateResult<T>> {
+    console.log({ filter, options });
     return this.model.paginate(filter, options);
   }
 
@@ -76,4 +77,4 @@ class MongoManager<T> implements Manager<T> {
   }
 }
 
-export default MongoManager;
+export default FsManager;

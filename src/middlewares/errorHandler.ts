@@ -6,7 +6,7 @@ export interface CustomError extends Error {
 }
 
 export default (error: CustomError, req: Request, res: Response, next: NextFunction): Response => {
-  console.error({ err: error.message });
+  console.error({ err: error });
   return res.json({
     statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
     url: `${req.method} ${req.url}`,

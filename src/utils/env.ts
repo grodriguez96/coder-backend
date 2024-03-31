@@ -8,6 +8,7 @@ config({ path });
 export default Object.fromEntries(
   Object.entries({
     PORT: process.env.PORT,
+    PERSISTENT: process.env.PERSISTENT,
     DB_LINK: process.env.DB_LINK,
     SECRET: process.env.SECRET,
     SECRET_KEY: process.env.SECRET_KEY,

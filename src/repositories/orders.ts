@@ -6,10 +6,17 @@ import type { FlattenMaps, UpdateQuery } from 'mongoose';
 export type OrdersRepositoryInterface = OrdersRepository;
 
 class OrdersRepository {
-  private model: Manager<Order>;
+  private _model: Manager<Order>;
 
   constructor() {
-    this.model = dao.orders;
+    this._model = dao.orders;
+  }
+
+  private get model(): Manager<Order> {
+    if (!this._model) {
+      this._model = dao.orders;
+    }
+    return this._model;
   }
 
   public create = async (data: Order): Promise<Result<Order> | null> => {

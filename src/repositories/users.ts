@@ -6,10 +6,17 @@ import type { FilterQuery, FlattenMaps, UpdateQuery } from 'mongoose';
 export type UsersRepositoryInterface = UsersRepository;
 
 class UsersRepository {
-  private model: Manager<User>;
+  private _model: Manager<User>;
 
   constructor() {
-    this.model = dao.users;
+    this._model = dao.users;
+  }
+
+  private get model(): Manager<User> {
+    if (!this._model) {
+      this._model = dao.users;
+    }
+    return this._model;
   }
 
   public create = async (data: User): Promise<Result<User> | null> => {

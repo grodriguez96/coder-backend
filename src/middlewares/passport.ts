@@ -45,7 +45,7 @@ passport.use(
         req.token = token;
         return done(null, user);
       } else {
-        return done(null, false, { message: 'Bad auth!!!' });
+        return done(null, false, { message: 'Bad auth' });
       }
     } catch (error) {
       return done(error);
