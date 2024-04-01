@@ -17,41 +17,41 @@ class FsManager<T> implements Manager<T> {
   }
 
   public read({ filter, options }: ReadOptions<T>): Promise<PaginateResult<T>> {
-    console.log({ filter, options });
     return this.model.paginate(filter, options);
   }
 
   public async reportBill(uid: string): Promise<Aggregate<T[]>> {
-    return this.model.aggregate([
-      { $match: { user_id: new Types.ObjectId(uid) } },
-      {
-        $lookup: {
-          from: 'products',
-          foreignField: '_id',
-          localField: 'productId',
-          as: 'productId',
-        },
-      },
-      {
-        $replaceRoot: {
-          newRoot: {
-            $mergeObjects: [{ $arrayElemAt: ['$productId', 0] }, '$$ROOT'],
-          },
-        },
-      },
-      { $set: { subtotal: { $multiply: ['$price', '$quantity'] } } },
-      { $group: { _id: '$userId', total: { $sum: '$subtotal' } } },
-      {
-        $project: {
-          _id: false,
-          userId: '$_id',
-          total: '$total',
-          date: new Date(),
-          currency: 'USD',
-        },
-      },
-      //{ $merge: { into: "bills" }}
-    ]);
+    throw Error('Not implemented');
+    // return this.model.aggregate([
+    //   { $match: { user_id: new Types.ObjectId(uid) } },
+    //   {
+    //     $lookup: {
+    //       from: 'products',
+    //       foreignField: '_id',
+    //       localField: 'productId',
+    //       as: 'productId',
+    //     },
+    //   },
+    //   {
+    //     $replaceRoot: {
+    //       newRoot: {
+    //         $mergeObjects: [{ $arrayElemAt: ['$productId', 0] }, '$$ROOT'],
+    //       },
+    //     },
+    //   },
+    //   { $set: { subtotal: { $multiply: ['$price', '$quantity'] } } },
+    //   { $group: { _id: '$userId', total: { $sum: '$subtotal' } } },
+    //   {
+    //     $project: {
+    //       _id: false,
+    //       userId: '$_id',
+    //       total: '$total',
+    //       date: new Date(),
+    //       currency: 'USD',
+    //     },
+    //   },
+    //   //{ $merge: { into: "bills" }}
+    // ]);
   }
 
   public async readOne(id: string): Promise<FlattenMaps<T> | null> {

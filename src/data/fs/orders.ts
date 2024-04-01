@@ -7,7 +7,7 @@ const schema = {
   productId: { type: String, required: true, ref: 'products' },
   userId: { type: String, required: true, ref: 'users' },
   quantity: { type: Number, required: true },
-  state: { type: Number },
+  state: { type: Number, required: true },
 };
 
 const model = new Model('./src/data/fs/files', 'orders', schema) as unknown as PaginateModel<OrderDTO>;

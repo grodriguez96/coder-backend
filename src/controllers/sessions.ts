@@ -29,12 +29,9 @@ class SessionsController {
   };
   public me = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
-      const user = {
-        email: req.user.email,
-        role: req.user.role,
-        photo: req.user.photo,
-      };
-      return res.success200(user);
+      const { email, role, photo, name, _id: id, lastName } = req.user;
+
+      return res.success200({ email, role, photo, name, _id: id, lastName });
     } catch (error) {
       return next(error);
     }

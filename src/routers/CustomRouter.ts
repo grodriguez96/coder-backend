@@ -56,7 +56,7 @@ class CustomRouter {
           else {
             const { email, role } = data as jwt.JwtPayload;
             if (arrayOfPolicies.includes(role)) {
-              const user = await dao.users.readByEmail(email);
+              const user = await dao.users.readByEmail({ email });
               req.user = user;
               return next();
             } else return res.error403();

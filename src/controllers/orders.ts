@@ -24,7 +24,6 @@ class OrderController {
       const options: PaginateOptions = {
         limit: +(req.query.limit as string) || 8,
         page: +(req.query.page as string) || 1,
-        sort: { title: req.query.sort === 'desc' ? 'desc' : 1 },
         lean: true,
       };
       const filter: FilterQuery<Order> = {};

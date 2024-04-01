@@ -1,10 +1,10 @@
 import fs from 'fs';
-import { FlattenMaps, FilterQuery, Types, PaginateOptions } from 'mongoose';
-import { PaginateResult, Result, ReadOptions } from '../../interfaces/manager';
+import { FlattenMaps, FilterQuery, PaginateOptions } from 'mongoose';
+import { PaginateResult, Result } from '../../interfaces/manager';
 import Ajv from 'ajv';
 
 interface SchemaField {
-  type: StringConstructor | NumberConstructor | BooleanConstructor;
+  type: StringConstructor | NumberConstructor | BooleanConstructor | ObjectConstructor;
   required?: boolean;
   ref?: string;
 }
@@ -13,7 +13,13 @@ interface Schema {
   [key: string]: SchemaField;
 }
 
-class Model<T extends { _id: string }> {
+const DEFAULT_SCHEMA = {
+  _id: { type: String, required: true },
+  updatedAt: { type: Object },
+  createdAt: { type: Object },
+};
+
+class Model<T extends { _id: string; updatedAt: string; createdAt: string }> {
   private models: T[] = [];
   private dataPath: string;
 
@@ -36,29 +42,53 @@ class Model<T extends { _id: string }> {
     }
   }
 
-  public async create(data: T): Promise<Result<T>> {
+  public async create(data: T): Promise<Result<T> | null> {
     try {
-      if (!this.validateData(data)) {
-        throw new Error('Provided data is not valid according to the schema');
+      if (this.validateData(data) && this.validateModel(data)) {
+        this.models.push(data);
+        const jsonData = JSON.stringify(this.models, null, 2);
+        await fs.promises.writeFile(this.dataPath, jsonData);
+        return data as any;
       }
-      this.models.push(data);
-      const jsonData = JSON.stringify(this.models, null, 2);
-      await fs.promises.writeFile(this.dataPath, jsonData);
-      return data as any;
+      return null;
     } catch (error: any) {
       throw new Error('Error creating the model: ' + error.message);
     }
   }
 
-  private validateData(data: T): boolean {
+  private validateModel(data: T): boolean {
+    const refs = Object.entries(this.schema).filter(([_, v]) => v.ref);
+    console.log(refs);
+    if (refs) {
+      return refs.every(([k, { ref }]) => {
+        const path = `${this.path}/${ref}.json`;
+        if (fs.existsSync(path)) {
+          const refModel: T[] = JSON.parse(fs.readFileSync(path, 'utf-8'));
+          const valid = refModel.some(({ _id }) => data[k as keyof T] === _id);
+          if (!valid) throw Error(`Cannot find ref for ${k}: ${data[k as keyof T]}`);
+          return valid;
+        }
+      });
+    }
+    return true;
+  }
+
+  private validateData(data: T | Partial<T>, isNew = true): boolean {
     const ajv = new Ajv();
+
+    const properties = {
+      ...this.schema,
+      ...(isNew ? { ...DEFAULT_SCHEMA } : { updatedAt: DEFAULT_SCHEMA.updatedAt }),
+    };
 
     const schema = {
       type: 'object',
-      properties: Object.fromEntries(Object.entries(this.schema).map(([key, value]) => [key, { type: value.type.name.toLowerCase() }])),
-      required: Object.keys(this.schema).filter((k) => this.schema[k].required),
-      additionalProperties: true,
+      properties: Object.fromEntries(Object.entries(properties).map(([key, value]) => [key, { type: value.type.name.toLowerCase() }])),
+      required: isNew ? Object.keys(this.schema).filter((k) => this.schema[k].required) : [],
+      additionalProperties: false,
     };
+
+    console.log({ schema });
     const validate = ajv.compile(schema);
     const valid = validate(data);
 
@@ -107,16 +137,18 @@ class Model<T extends { _id: string }> {
     try {
       const modelIndex = this.models.findIndex((m) => m._id === id);
       if (modelIndex !== -1) {
-        const updatedModel = { ...this.models[modelIndex], ...update };
-        this.models[modelIndex] = updatedModel;
-        const jsonData = JSON.stringify(this.models, null, 2);
-        await fs.promises.writeFile(this.dataPath, jsonData);
-        return updatedModel as any;
-      } else {
-        return null;
+        update.updatedAt = new Date() as any;
+        if (this.validateData(update, false)) {
+          const updatedModel = { ...this.models[modelIndex], ...update };
+          this.models[modelIndex] = updatedModel;
+          const jsonData = JSON.stringify(this.models, null, 2);
+          await fs.promises.writeFile(this.dataPath, jsonData);
+          return updatedModel as any;
+        }
       }
-    } catch (error) {
-      throw new Error('Error updating the model by ID');
+      return null;
+    } catch (error: any) {
+      throw new Error(error);
     }
   }
 
@@ -170,7 +202,7 @@ class Model<T extends { _id: string }> {
           const refModel: T[] = JSON.parse(fs.readFileSync(path, 'utf-8'));
           data = data.map((d) => ({
             ...d,
-            [key]: refModel.filter(({ _id }) => _id === d._id),
+            [key]: refModel.filter(({ _id }) => _id === d[key as keyof T]),
           }));
         }
       });
