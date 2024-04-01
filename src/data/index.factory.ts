@@ -19,7 +19,7 @@ const data = {
   dev: persistences.fs,
   prod: persistences.mongo,
 };
-const environment = (argsUtil.env as keyof typeof data) ?? 'test';
+const environment = (env.ENV as keyof typeof data);
 const persistence = env.PERSISTENT as keyof typeof persistences;
 const { cb, paths } = persistences[persistence] ?? data[environment];
 

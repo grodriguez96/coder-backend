@@ -4,8 +4,8 @@
   "description": "",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "tsc-watch --onSuccess \"node ./dist/server.js\"",
-    "start": "node dist/server.js --env prod ",
+    "dev": "env=dev tsc-watch --onSuccess \"node dist/server.js\"",
+    "start": "npm run build && node dist/server.js",
     "build": "tsc"
   },
   "author": "",

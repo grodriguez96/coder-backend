@@ -1,6 +1,6 @@
 import Roles from '../enums/roles';
-import argsUtil from '../utils/args';
 import crypto from 'crypto';
+import env from '../utils/env';
 
 export type User = {
   lastName?: string;
@@ -25,7 +25,7 @@ class UserDTO {
   public createdAt?: Date;
 
   constructor(data: User) {
-    argsUtil.env !== 'prod' && (this._id = crypto.randomBytes(12).toString('hex'));
+    env.ENV !== 'prod' && (this._id = crypto.randomBytes(12).toString('hex'));
     this.email = data.email;
     this.password = data.password;
     this.name = data.name;
@@ -33,8 +33,8 @@ class UserDTO {
     this.photo = data.photo || 'img/profile/profile-1.webp';
     this.age = data.age || 18;
     this.role = data.role || Roles.User;
-    argsUtil.env !== 'prod' && (this.updatedAt = new Date());
-    argsUtil.env !== 'prod' && (this.createdAt = new Date());
+    env.ENV !== 'prod' && (this.updatedAt = new Date());
+    env.ENV !== 'prod' && (this.createdAt = new Date());
   }
 }
 

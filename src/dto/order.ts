@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
-import argsUtil from '../utils/args';
 import crypto from 'crypto';
 import States from '../enums/states';
+import env from '../utils/env';
 
 export type Order = {
   productId: Types.ObjectId;
@@ -20,13 +20,13 @@ class OrderDTO {
   public createdAt?: Date;
 
   constructor(data: Order) {
-    argsUtil.env !== 'prod' && (this._id = crypto.randomBytes(12).toString('hex'));
+    env.ENV !== 'prod' && (this._id = crypto.randomBytes(12).toString('hex'));
     this.userId = data.userId;
     this.productId = data.productId;
     this.quantity = data.quantity || 1;
     this.state = data.state || States.Reserved;
-    argsUtil.env !== 'prod' && (this.updatedAt = new Date());
-    argsUtil.env !== 'prod' && (this.createdAt = new Date());
+    env.ENV !== 'prod' && (this.updatedAt = new Date());
+    env.ENV !== 'prod' && (this.createdAt = new Date());
   }
 }
 
