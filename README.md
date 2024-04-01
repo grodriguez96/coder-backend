@@ -23,4 +23,4 @@
     # GOOGLE_CLIENT=tu_google_cliente
     ```
 
-5. **¡Y eso es todo! Ahora estás listo para seguir con las instrucciones específicas de tu proyecto. 🎉**
+5. **¡Y eso es todo! Ahora estás listo para iniciar. 🎉**
